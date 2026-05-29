@@ -4,7 +4,7 @@ This repository contains a plain JavaScript browser app built from the Kusurino 
 
 It uses the local Cortex Decoder SDK package in this folder:
 
-- `codecorp-web_sdk-3.0.0.tgz`
+- `codecorp-web_sdk-2.7.0.tgz`
 
 The app keeps the core scanner behavior and adds a small debug UI for:
 

@@ -15,7 +15,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "codecorp-web_sdk": "file:codecorp-web_sdk-3.0.0.tgz",
+    "codecorp-web_sdk": "file:codecorp-web_sdk-2.7.0.tgz",
     "vite": "^8.0.14"
   }
 }
