@@ -1,0 +1,21 @@
+{
+  "name": "kusurino_debug",
+  "version": "1.0.0",
+  "description": "Plain JavaScript camera scanner built from the Kusurino TSX flow",
+  "scripts": {
+    "predev": "npm run prepare-assets",
+    "dev": "vite",
+    "prebuild": "npm run prepare-assets",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare-assets": "node scripts/copy-sdk-assets.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "codecorp-web_sdk": "file:codecorp-web_sdk-3.0.0.tgz",
+    "vite": "^8.0.14"
+  }
+}

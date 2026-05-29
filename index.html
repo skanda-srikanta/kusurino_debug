@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kusurino Barcode Debug</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <section class="camera-panel">
+        <div class="camera-panel-header">
+          <div>
+            <p class="eyebrow">Cortex Decoder Debug</p>
+            <h1>Kusurino Camera Scanner</h1>
+          </div>
+          <p class="camera-panel-note">Camera and diagnostics stay first for Android testing.</p>
+        </div>
+
+        <div id="cameraContainer" class="camera-frame is-hidden">
+          <video id="video" playsinline></video>
+        </div>
+      </section>
+
+      <section class="control-panel">
+        <div class="button-row action-row">
+          <button id="startButton" type="button">Initialize and start</button>
+          <button id="stopButton" type="button" class="secondary">Stop camera</button>
+          <button id="clearButton" type="button" class="ghost">Clear results</button>
+        </div>
+
+        <div class="status-stack">
+          <p id="statusMessage" class="status">Idle.</p>
+          <p id="errorMessage" class="error hidden"></p>
+        </div>
+
+        <details class="settings-details">
+          <summary>Scanner settings</summary>
+
+          <div class="settings-copy">
+          <p class="eyebrow">Cortex Decoder Debug</p>
+          <p class="intro">
+            This plain JavaScript app keeps the same SDK initialization, license activation,
+            camera selection, duplicate suppression, and barcode processing flow from the
+            provided TSX component.
+          </p>
+          </div>
+
+          <label class="field">
+            <span>License key</span>
+            <textarea
+              id="licenseKey"
+              rows="4"
+              placeholder="Paste the CortexDecoder license key here"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Scan mode</span>
+            <select id="scanMode">
+              <option value="EACH_SCAN">Each scan</option>
+              <option value="MULTI_SCAN">Multi scan</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Camera resolution</span>
+            <select id="resolutionSelect">
+              <option value="RES640x360">640 x 360</option>
+              <option value="RES1280x720">1280 x 720</option>
+              <option value="RES1920x1080">1920 x 1080</option>
+              <option value="RES3840x2160">3840 x 2160 (4K)</option>
+            </select>
+          </label>
+        </details>
+      </section>
+
+      <section class="metrics-panel">
+        <div class="results-header">
+          <h2>Performance diagnostics</h2>
+          <p>Live browser-side telemetry for preview smoothness and UI load.</p>
+        </div>
+        <div class="metrics-legend" aria-label="Diagnostics legend">
+          <div class="legend-item">
+            <span class="legend-swatch legend-swatch--good" aria-hidden="true"></span>
+            <span>Good</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch legend-swatch--warning" aria-hidden="true"></span>
+            <span>Watch</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch legend-swatch--bad" aria-hidden="true"></span>
+            <span>Poor</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch legend-swatch--neutral" aria-hidden="true"></span>
+            <span>No data</span>
+          </div>
+        </div>
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <span class="metric-label">Selected resolution</span>
+            <strong id="selectedResolutionMetric" class="metric-value">3840 x 2160</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Actual video size</span>
+            <strong id="actualResolutionMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Preview FPS</span>
+            <strong id="previewFpsMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">UI FPS</span>
+            <strong id="uiFpsMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Decode callbacks/s</span>
+            <strong id="decodeRateMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Barcodes/s</span>
+            <strong id="barcodeRateMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Long tasks/s</span>
+            <strong id="longTaskMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Worst long task</span>
+            <strong id="longTaskMaxMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Event loop lag</span>
+            <strong id="eventLoopLagMetric" class="metric-value">-</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">JS heap used</span>
+            <strong id="memoryMetric" class="metric-value">Unavailable</strong>
+          </article>
+        </div>
+        <p class="metrics-note">
+          Low preview FPS with high long-task counts or event-loop lag points to UI-thread pressure.
+          Low preview FPS with low UI pressure points more toward camera or decode throughput limits.
+        </p>
+        <details class="thresholds-details">
+          <summary>Threshold reference</summary>
+          <div class="thresholds-grid">
+            <div class="threshold-item">
+              <strong>Selected resolution</strong>
+              <span>Good: 720p or lower</span>
+              <span>Watch: 1080p</span>
+              <span>Poor: above 1080p</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Actual video size</strong>
+              <span>Good: 720p or lower</span>
+              <span>Watch: 1080p</span>
+              <span>Poor: above 1080p</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Preview FPS</strong>
+              <span>Good: 30+</span>
+              <span>Watch: 24 to 29.9</span>
+              <span>Poor: below 24</span>
+            </div>
+            <div class="threshold-item">
+              <strong>UI FPS</strong>
+              <span>Good: 30+</span>
+              <span>Watch: 24 to 29.9</span>
+              <span>Poor: below 24</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Decode callbacks/s</strong>
+              <span>Good: 8+</span>
+              <span>Watch: 4 to 7.9</span>
+              <span>Poor: below 4</span>
+              <span>No data: idle scene</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Barcodes/s</strong>
+              <span>Good: 1.0+</span>
+              <span>Watch: 0.3 to 0.9</span>
+              <span>Poor: below 0.3</span>
+              <span>No data: no barcode activity</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Long tasks/s</strong>
+              <span>Good: 0 to 0.2</span>
+              <span>Watch: 0.21 to 1.0</span>
+              <span>Poor: above 1.0</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Worst long task</strong>
+              <span>Good: up to 50 ms</span>
+              <span>Watch: 51 to 100 ms</span>
+              <span>Poor: above 100 ms</span>
+            </div>
+            <div class="threshold-item">
+              <strong>Event loop lag</strong>
+              <span>Good: up to 50 ms</span>
+              <span>Watch: 51 to 100 ms</span>
+              <span>Poor: above 100 ms</span>
+            </div>
+            <div class="threshold-item">
+              <strong>JS heap usage</strong>
+              <span>Good: under 50%</span>
+              <span>Watch: 50% to 70%</span>
+              <span>Poor: above 70%</span>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="results-panel">
+        <div class="results-header">
+          <h2>Decoded results</h2>
+          <p>Newest results appear first.</p>
+        </div>
+        <div id="resultsEmptyState" class="empty-state">No barcodes decoded yet.</div>
+        <div id="resultsList" class="results-list"></div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+  </html>
