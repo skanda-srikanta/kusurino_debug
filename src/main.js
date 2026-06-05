@@ -86,6 +86,7 @@ const elements = {
   errorMessage: document.querySelector("#errorMessage"),
   cameraContainer: document.querySelector("#cameraContainer"),
   video: document.querySelector("#video"),
+  overlayCanvas: document.querySelector("#overlayCanvas"),
   resultsList: document.querySelector("#resultsList"),
   resultsEmptyState: document.querySelector("#resultsEmptyState"),
   selectedResolutionMetric: document.querySelector("#selectedResolutionMetric"),
@@ -515,53 +516,53 @@ async function authenticateLicense(licenseKey) {
 }
 
 async function configureDecoder() {
-  CortexDecoder.CDDevice.audio = false;
-  CortexDecoder.CDDevice.vibration = false;
+  CortexDecoder.CDDevice.audio = true;
+  CortexDecoder.CDDevice.vibration = true;
 
   const cdSymbology = new CortexDecoder.CDSymbology();
-  cdSymbology.GS1Databar.enable = true;
-  cdSymbology.Code128.enable = true;
+  // cdSymbology.GS1Databar.enable = true;
+  // cdSymbology.Code128.enable = true;
 
-  cdSymbology.QR.enable = false;
-  cdSymbology.DataMatrix.enable = false;
-  cdSymbology.Aztec.enable = false;
-  cdSymbology.MaxiCode.enable = false;
-  cdSymbology.DotCode.enable = false;
-  cdSymbology.GridMatrix.enable = false;
-  cdSymbology.HanXinCode.enable = false;
-  cdSymbology.HongKong2of5.enable = false;
-  cdSymbology.IATA2of5.enable = false;
-  cdSymbology.Interleaved2of5.enable = false;
-  cdSymbology.Matrix2of5.enable = false;
-  cdSymbology.Straight2of5.enable = false;
-  cdSymbology.NEC2of5.enable = false;
-  cdSymbology.Codabar.enable = false;
-  cdSymbology.Code11.enable = false;
-  cdSymbology.Code32.enable = false;
-  cdSymbology.Code39.enable = false;
-  cdSymbology.Code49.enable = false;
-  cdSymbology.Code93.enable = false;
-  cdSymbology.CompositeCode.enable = false;
-  cdSymbology.CodablockF.enable = false;
-  cdSymbology.EAN13.enable = false;
-  cdSymbology.UPCA.enable = false;
-  cdSymbology.EAN8.enable = false;
-  cdSymbology.UPCE.enable = false;
-  cdSymbology.Trioptic.enable = false;
-  cdSymbology.Telepen.enable = false;
-  cdSymbology.Plessey.enable = false;
-  cdSymbology.PDF417.enable = false;
-  cdSymbology.MSIPlessey.enable = false;
-  cdSymbology.AustraliaPost.enable = false;
-  cdSymbology.CanadaPost.enable = false;
-  cdSymbology.DutchPost.enable = false;
-  cdSymbology.JapanPost.enable = false;
-  cdSymbology.KoreaPost.enable = false;
-  cdSymbology.RoyalMail.enable = false;
-  cdSymbology.UPU.enable = false;
-  cdSymbology.USPSIntelligent.enable = false;
-  cdSymbology.USPSPlanet.enable = false;
-  cdSymbology.USPSPostnet.enable = false;
+  // cdSymbology.QR.enable = false;
+  // cdSymbology.DataMatrix.enable = false;
+  // cdSymbology.Aztec.enable = false;
+  // cdSymbology.MaxiCode.enable = false;
+  // cdSymbology.DotCode.enable = false;
+  // cdSymbology.GridMatrix.enable = false;
+  // cdSymbology.HanXinCode.enable = false;
+  // cdSymbology.HongKong2of5.enable = false;
+  // cdSymbology.IATA2of5.enable = false;
+  // cdSymbology.Interleaved2of5.enable = false;
+  // cdSymbology.Matrix2of5.enable = false;
+  // cdSymbology.Straight2of5.enable = false;
+  // cdSymbology.NEC2of5.enable = false;
+  // cdSymbology.Codabar.enable = false;
+  // cdSymbology.Code11.enable = false;
+  // cdSymbology.Code32.enable = false;
+  // cdSymbology.Code39.enable = false;
+  // cdSymbology.Code49.enable = false;
+  // cdSymbology.Code93.enable = false;
+  // cdSymbology.CompositeCode.enable = false;
+  // cdSymbology.CodablockF.enable = false;
+  // cdSymbology.EAN13.enable = false;
+  // cdSymbology.UPCA.enable = false;
+  // cdSymbology.EAN8.enable = false;
+  // cdSymbology.UPCE.enable = false;
+  // cdSymbology.Trioptic.enable = false;
+  // cdSymbology.Telepen.enable = false;
+  // cdSymbology.Plessey.enable = false;
+  // cdSymbology.PDF417.enable = false;
+  // cdSymbology.MSIPlessey.enable = false;
+  // cdSymbology.AustraliaPost.enable = false;
+  // cdSymbology.CanadaPost.enable = false;
+  // cdSymbology.DutchPost.enable = false;
+  // cdSymbology.JapanPost.enable = false;
+  // cdSymbology.KoreaPost.enable = false;
+  // cdSymbology.RoyalMail.enable = false;
+  // cdSymbology.UPU.enable = false;
+  // cdSymbology.USPSIntelligent.enable = false;
+  // cdSymbology.USPSPlanet.enable = false;
+  // cdSymbology.USPSPostnet.enable = false;
 
   CortexDecoder.CDPerformanceFeatures.lowContrast = true;
 
@@ -638,7 +639,12 @@ async function startCameraWithLock(videoElement, onResults) {
       return;
     }
 
-    await CortexDecoder.CDCamera.init(videoElement);
+    if (elements.overlayCanvas) {
+      elements.overlayCanvas.width = 0;
+      elements.overlayCanvas.height = 0;
+    }
+
+    await CortexDecoder.CDCamera.init(videoElement, elements.overlayCanvas ?? undefined);
     await CortexDecoder.CDCamera.setHighlightBarcodes(true);
     await CortexDecoder.CDCamera.setResolution(getResolutionEnumValue());
 

@@ -255,10 +255,29 @@ button:disabled {
   width: 100%;
   height: clamp(18rem, 52vh, 34rem);
   object-fit: cover;
+  position: relative;
+  z-index: 0;
 }
 
 @supports (height: 1svh) {
   #video {
+    height: clamp(18rem, 52svh, 34rem);
+  }
+}
+
+#overlayCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: clamp(18rem, 52vh, 34rem);
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@supports (height: 1svh) {
+  #overlayCanvas {
     height: clamp(18rem, 52svh, 34rem);
   }
 }
